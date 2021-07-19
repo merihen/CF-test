@@ -1,0 +1,161 @@
+spring:
+   application:
+      name: cfng-config
+   profiles:
+      active: native, local
+   security:
+      user:
+         name: cfng-config-server
+         password: cfng-config-client
+   cloud:
+      loadbalancer.ribbon.enabled: false   
+      config:
+         allowOverride: false
+         server:
+            bootstrap: true
+            native.location.search-locations: file:./config/ #add valid path here
+            overrides: # Shared configuration
+# Service name in eureka
+               cfng.services.name:
+                  api: http://CFNG-API
+                  auth: http://cfng-auth
+                  backend: http://CFNG
+                  access-management: http://cfng-access-management
+                  event: http://cfng-event
+                  passphrase-manager: http://cfng-passphrase-manager
+                  messagerie: http://SM
+# Eureka configuration
+               eureka:
+                  instance:
+                     leaseRenewalIntervalInSeconds: 5
+                     lease-expiration-duration-in-seconds: 5
+                     preferIpAddress: false
+                  client:
+                     fetch-registry: true
+                     registry-fetch-interval-seconds: 5
+# Vault configuration
+               vault:
+                  uri: http://172.26.74.245:8200
+                  authentication: TOKEN
+                  token: s.3VDLLlvmNGs8ntqcmiCKxEDc
+# Zipkin configuration
+               spring.zipkin:
+                  enabled: false
+                  base-url: http://localhost:9411
+                  locator.discovery.enabled: false
+# Sleuth configuration
+               spring.sleuth:
+                  sampler.percentage: 1.0
+                  web.skip-pattern: (^cleanup.*)
+# Feign configuration
+               feign:
+                  client:
+                     config:
+                        default:
+                           connectTimeout: ${rest.timeout}
+                           readTimeout: ${rest.timeout}
+# Ribbon configuration
+               ribbon:
+                  ReadTimeout: ${rest.timeout}
+                  ConnectTimeout: ${rest.timeout}
+                  OkToRetryOnAllOperations: true
+                  MaxAutoRetries: 1
+                  MaxAutoRetriesNextServer: 1
+# Pro Register configuration
+               pro-register:
+                  enabled: false
+                  host: https://uat-proregister.cfng.openstack.local:3004
+                  add-api: /api/chaincodes/trace/cfng/lab
+                  find-api: /api/chaincodes/trace/cfng/lab/queryByKeys
+                  retry:
+                     attempts: 5
+                     delay: 10
+# Mail configuration
+               spring.mail:
+                  default-encoding: UTF-8
+                  host: relaissmtp.almerys.local
+                  port: 25
+                  from: noreply-beidys@be-ys.com
+                  username: null
+                  password: null
+                  properties:
+                     mail:
+                        smtp:
+                           auth: false
+                           ssl:
+                              enable: false
+                           starttls:
+                              enable: false
+                  protocol: smtp
+                  test-connection: true
+# Rabbit MQ configuration
+               amqp:
+                  config:
+                     userName: admin
+                     password: admin
+                     host: localhost
+                     port: 5672
+                  transactional:
+                     successExchange: cfng_transaction_success_config
+                     rollbackExchange: cfng_transaction_rollback_config
+                     vaultQueue: vault_queue_config
+                     vaultExchange: vault_exchange_config
+                  event:
+                     eventExchange: event
+                     routingTechnicalKey: technicalEvent
+                     routingFunctionalKey: functionalEvent
+               management:
+                  security:
+                     enabled: false
+                  endpoint:
+                     prometheus:
+                        enabled: true
+                  endpoints:
+                     web:
+                        base-path: /
+                        exposure:
+                           include: info,health,prometheus,refresh
+server:
+   port: 8443
+management:
+   security:
+      enabled: false
+   endpoint:
+      prometheus:
+         enabled: true
+   endpoints:
+      web:
+         base-path: /
+         exposure:
+            include: info,health,prometheus
+
+eureka:
+   server:
+      host: localhost
+      port: 8761
+      security:
+         name: discovery
+         password: discovery123
+   instance:
+      hostname: localhost
+      leaseRenewalIntervalInSeconds: 5
+      lease-expiration-duration-in-seconds: 5
+      preferIpAddress: false
+   client:
+      fetch-registry: true
+      registry-fetch-interval-seconds: 5
+      service-url:
+         defaultZone: http://${eureka.server.security.name}:${eureka.server.security.password}@${eureka.server.host}:${eureka.server.port}/eureka
+
+logging.level:
+   root: info
+   com.almerys: info
+   org.springframework:
+      security: info
+      cloud.sleuth: info
+   com.netflix.discovery:
+      DiscoveryClient: OFF
+      shared.transport.decorator: OFF
+      shared.resolver.aws.ConfigClusterResolver: OFF
+      
+rest.timeout: 30000
